@@ -64,7 +64,6 @@ void passiveProgramm(int spd, int loAngle, int hiAngle, int minsTime, int number
     while (abs(curAngle - hiAngle) > 3 && millis() - curTime < minsTime * 60 * 1000) {
       curAngle = calibrateAngle(analogRead(ANGLEPIN));
       Serial.println(curAngle);
-      nexListen(passive_listen_list);
       if (isStopped) {
         return;
       }
@@ -75,7 +74,6 @@ void passiveProgramm(int spd, int loAngle, int hiAngle, int minsTime, int number
     digitalWrite(INA, HIGH);
     while (abs(curAngle - loAngle) > 3 && millis() - curTime < minsTime * 60 * 1000) {
       curAngle = calibrateAngle(analogRead(ANGLEPIN));
-      nexListen(passive_listen_list);
       if (isStopped) {
         return;
       }
@@ -256,7 +254,7 @@ int calibrateAngle(int angle) {
 
 
 class MyCallbacks: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) {
+    void onWrite(BLECharacteristic *pCharacteristic, void *ptr) {
       String value = pCharacteristic->getValue().c_str();
 
       if (value.length() > 0) {
@@ -265,11 +263,13 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         for (int i = 0; i < value.length(); i++){
           
         }
-        Serial.print(value);
+        Serial.print(value[0]);
 
         Serial.println();
         Serial.println("*********");
         delay(2000);
+        if(value[0] == 1)
+          passiveProgramm(5, 0, 135, 5, 1, ptr);
       }
     }
 };
